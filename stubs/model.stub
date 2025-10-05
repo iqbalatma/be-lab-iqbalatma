@@ -1,0 +1,20 @@
+<?php
+
+namespace {{ namespace }};
+
+{{ factoryImport }}
+use Illuminate\Database\Eloquent\Model;
+use Iqbalatma\LaravelServiceRepo\Contracts\Interfaces\DeletableRelationCheck;
+
+class {{ class }} extends Model implements DeletableRelationCheck
+{
+    {{ factory }}
+    public const array RELATION_CHECK_BEFORE_DELETE = [
+
+    ];
+
+    public function getRelationCheckBeforeDelete(): array
+    {
+        return self::RELATION_CHECK_BEFORE_DELETE;
+    }
+}

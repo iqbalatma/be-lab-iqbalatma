@@ -23,17 +23,14 @@ class AuthenticateController extends Controller
 
     /**
      * @param AuthenticateRequest $request
-     * @return APIResponse
+     * @return JsonResponse
      */
     public function authenticate(AuthenticateRequest $request): JsonResponse
     {
         $credentials = request(['username', 'password']);
         if (!$token = Auth::attempt($credentials)) {
-            return new APIResponse(
-                [
-                    'error' => 'Unauthorized'
-                ],
-                "Invalid credentials."
+            return response()->json(
+                ["message" => "Invalid credentials."]
             );
         }
 
@@ -51,13 +48,13 @@ class AuthenticateController extends Controller
                         "first_name" => $user->first_name,
                         "last_name" => $user->last_name,
                         "email" => $user->email,
-                        "access_token" => $token["access_token"],
+                        "access_token" => Auth::getAccessToken(),
                     ],
                 ],
             ]
         )
-            ->withCookie(getCreatedCookieAccessTokenVerifier($token["access_token_verifier"]))
-            ->withCookie(getCreatedCookieRefreshToken($token["refresh_token"]));
+            ->withCookie(getCreatedCookieAccessTokenVerifier(Auth::getAccessTokenVerifier()))
+            ->withCookie(getCreatedCookieRefreshToken(Auth::getRefreshToken()));
     }
 
     /**

@@ -13,12 +13,12 @@ Route::prefix("auth")
     ->name("auth.")
     ->controller(AuthenticateController::class)->group(function () {
         Route::post("authenticate", "authenticate");
-        Route::post("logout", "logout")->middleware("api" );
-        Route::post("refresh", "refresh")->middleware("api" );
+        Route::post("logout", "logout")->middleware("auth.jwt:".\Iqbalatma\LaravelJwtAuthentication\Enums\JWTTokenType::ACCESS->name);
+        Route::post("refresh", "refresh")->middleware("auth.jwt:".\Iqbalatma\LaravelJwtAuthentication\Enums\JWTTokenType::REFRESH->name);
     });
 
 
-Route::middleware("api")->group(function () {
+Route::middleware("auth.jwt:".\Iqbalatma\LaravelJwtAuthentication\Enums\JWTTokenType::ACCESS->name)->group(function () {
     Route::prefix("master")->name("master")->group(function () {
         Route::controller(\App\Http\Controllers\Master\AuthorizationController::class)->group(function () {
             Route::get("roles", "roles")->name("roles");

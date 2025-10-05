@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AuthenticateRequest;
+use Illuminate\Support\Facades\Auth;
 use Iqbalatma\LaravelUtils\APIResponse;
 
 class AuthenticateController extends Controller
@@ -24,7 +25,7 @@ class AuthenticateController extends Controller
     public function authenticate(AuthenticateRequest $request): APIResponse
     {
         $credentials = request(['username', 'password']);
-        if (!$token = auth()->attempt($credentials)) {
+        if (!$token = Auth::attempt($credentials)) {
             return new APIResponse(
                 [
                     'error' => 'Unauthorized'
@@ -59,6 +60,7 @@ class AuthenticateController extends Controller
 
     protected function respondWithToken($token): APIResponse
     {
+        ddapi($token);
         return new APIResponse(
             [
                 'access_token' => $token,

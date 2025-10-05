@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AuthenticateRequest;
+use App\Http\ResponseCode;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Iqbalatma\LaravelUtils\APIResponse;
 
@@ -22,7 +25,7 @@ class AuthenticateController extends Controller
      * @param AuthenticateRequest $request
      * @return APIResponse
      */
-    public function authenticate(AuthenticateRequest $request): APIResponse
+    public function authenticate(AuthenticateRequest $request): JsonResponse
     {
         $credentials = request(['username', 'password']);
         if (!$token = Auth::attempt($credentials)) {
@@ -34,7 +37,27 @@ class AuthenticateController extends Controller
             );
         }
 
-        return $this->respondWithToken($token);
+        /** @var User $user */
+        $user = Auth::user();
+        return response()->json(
+            [
+                "code" => ResponseCode::SUCCESS()->name,
+                "message" => "Logged in successfully.",
+                "timestamp" => now(),
+                "payload" => [
+                    "data" => [
+                        "id" => $user->id,
+                        "username" => $user->username,
+                        "first_name" => $user->first_name,
+                        "last_name" => $user->last_name,
+                        "email" => $user->email,
+                        "access_token" => $token["access_token"],
+                    ],
+                ],
+            ]
+        )
+            ->withCookie(getCreatedCookieAccessTokenVerifier($token["access_token_verifier"]))
+            ->withCookie(getCreatedCookieRefreshToken($token["refresh_token"]));
     }
 
     /**
@@ -42,7 +65,7 @@ class AuthenticateController extends Controller
      */
     public function logout(): APIResponse
     {
-        auth()->logout();
+        Auth::logout();
 
         return new APIResponse(
             null,
@@ -51,23 +74,32 @@ class AuthenticateController extends Controller
     }
 
     /**
-     * @return APIResponse
+     * @return JsonResponse
      */
-    public function refresh(): APIResponse
+    public function refresh(): JsonResponse
     {
-        return $this->respondWithToken(auth()->refresh());
-    }
+        Auth::refreshToken(Auth::user());
 
-    protected function respondWithToken($token): APIResponse
-    {
-        ddapi($token);
-        return new APIResponse(
+        /** @var User $user */
+        $user = Auth::user();
+        return response()->json(
             [
-                'access_token' => $token,
-                'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 60
-            ],
-            "Generate token successfully.",
-        );
+                "code" => ResponseCode::SUCCESS()->name,
+                "message" => "Logged in successfully.",
+                "timestamp" => now(),
+                "payload" => [
+                    "data" => [
+                        "id" => $user->id,
+                        "username" => $user->username,
+                        "first_name" => $user->first_name,
+                        "last_name" => $user->last_name,
+                        "email" => $user->email,
+                        "access_token" => Auth::getAccessToken()
+                    ],
+                ],
+            ]
+        )
+            ->withCookie(getCreatedCookieAccessTokenVerifier(Auth::getAccessTokenVerifier()))
+            ->withCookie(getCreatedCookieRefreshToken(Auth::getRefreshToken()));
     }
 }

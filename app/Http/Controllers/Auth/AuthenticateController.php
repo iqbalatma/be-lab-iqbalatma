@@ -28,7 +28,7 @@ class AuthenticateController extends Controller
     public function authenticate(AuthenticateRequest $request): JsonResponse
     {
         $credentials = request(['username', 'password']);
-        if (!$token = Auth::attempt($credentials)) {
+        if (!Auth::attempt($credentials)) {
             return response()->json(
                 ["message" => "Invalid credentials."]
             );

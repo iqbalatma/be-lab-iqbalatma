@@ -132,7 +132,7 @@ return [
         'http_only' => true,
         'path' => "/",
         'domain' => null,
-        'secure' => true,
+        'secure' => false,
         'same_site' => 'lax',
     ],
 
@@ -151,7 +151,7 @@ return [
         'http_only' => true,
         'path' => "/",
         'domain' => null,
-        'secure' => true,
+        'secure' => false,
         'same_site' => 'lax',
     ]
 ];
